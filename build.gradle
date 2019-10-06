@@ -1,0 +1,27 @@
+//plugins {
+//    id 'java-library'
+//    id 'jacoco'
+//}
+group = 'io.github.ihsahn'
+
+apply plugin: 'java-library'
+apply plugin: 'jacoco'
+
+repositories {
+    jcenter()
+}
+
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+}
+
+wrapper {
+    gradleVersion = "5.6.2"
+}
