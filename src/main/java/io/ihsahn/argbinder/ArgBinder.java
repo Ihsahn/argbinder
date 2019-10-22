@@ -8,7 +8,7 @@ import java.util.Iterator;
 
 public class ArgBinder {
 
-    private Object target;
+    private final Object target;
 
     public ArgBinder(Object target) {
         this.target = target;
