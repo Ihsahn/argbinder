@@ -28,13 +28,16 @@ public class ArgBinder {
                 value = Optional.of(argsIterator.next());
             }
 
-            if (value.isPresent()) {
-                try {
-                    PropertyUtils.setNestedProperty(target, paramName, value.get());
-                }  catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            String finalParamName = paramName; //variables in lambdas have to be final...
+            value.ifPresent(valueObject -> setProperty(finalParamName, valueObject));
+        }
+    }
+
+    private void setProperty(String paramName, Object value) {
+        try {
+            PropertyUtils.setNestedProperty(target, paramName, value);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
     }
 
