@@ -5,6 +5,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Optional;
 
 public class ArgBinder {
 
@@ -18,14 +19,25 @@ public class ArgBinder {
         Iterator<String> argsIterator = Arrays.asList(args).iterator();
         while (argsIterator.hasNext()) {
             String paramName = argsIterator.next();
-            if (argsIterator.hasNext()) {
-                String value = argsIterator.next();
-                try {
-                    PropertyUtils.setNestedProperty(target, paramName, value);
-                }  catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                }
+            Optional<String> value = Optional.empty();
+            if (paramName.contains("=")) {
+                String[] split = paramName.split("=", 2);
+                paramName = split[0];
+                value = Optional.of(split[1]);
+            } else if (argsIterator.hasNext()) {
+                value = Optional.of(argsIterator.next());
             }
+
+            String finalParamName = paramName; //variables in lambdas have to be final...
+            value.ifPresent(valueObject -> setProperty(finalParamName, valueObject));
+        }
+    }
+
+    private void setProperty(String paramName, Object value) {
+        try {
+            PropertyUtils.setNestedProperty(target, paramName, value);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
     }
 
