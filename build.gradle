@@ -1,16 +1,16 @@
-//plugins {
-//    id 'java-library'
-//    id 'jacoco'
-//}
-group = 'io.github.ihsahn'
-
-apply plugin: 'java-library'
-apply plugin: 'jacoco'
-
-repositories {
-    jcenter()
+plugins {
+    id 'maven-publish'
+    id 'jacoco'
+    id 'java-library'
 }
 
+group = 'io.github.ihsahn'
+version = '0.1-SNAPSHOT'
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
 
 test {
     useJUnitPlatform()
@@ -20,6 +20,26 @@ dependencies {
     implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+}
+
+println "user:"+System.getenv()
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Ihsahn/argbinder")
+            credentials {
+                username = project.findProperty("github.user") ?: System.getenv("GITHUB_USER")
+                password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+    publications {
+        argBinder(MavenPublication) {
+            from components.java
+        }
+    }
 }
 
 wrapper {
