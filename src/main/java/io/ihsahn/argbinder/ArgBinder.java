@@ -2,7 +2,10 @@ package io.ihsahn.argbinder;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Optional;
@@ -33,8 +36,15 @@ public class ArgBinder {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void setProperty(String paramName, Object value) {
         try {
+            PropertyDescriptor propertyDescriptor = PropertyUtils.getPropertyDescriptor(target, paramName);
+            Method readMethod = propertyDescriptor.getReadMethod();
+            Type genericReturnType = readMethod.getGenericReturnType();
+            if ((genericReturnType instanceof Class && ((Class<?>)genericReturnType).isEnum())) {
+                value = Enum.valueOf(((Class<Enum>)genericReturnType), value.toString());
+            }
             PropertyUtils.setNestedProperty(target, paramName, value);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
