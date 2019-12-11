@@ -61,7 +61,7 @@ class ArgBinderListsTest {
     public void testFlatClassStringValuesIndexes() {
         FlatClassListsValues target = new FlatClassListsValues();
         ArgBinder binder = new ArgBinder(target);
-        String[] args = {"descriptions[0]", "desc1","descriptions[1]", "desc2"};
+        String[] args = {"descriptions[0]", "desc1", "descriptions[1]", "desc2"};
         binder.parse(args);
 
         assertEquals(2, target.getDescriptions().size());

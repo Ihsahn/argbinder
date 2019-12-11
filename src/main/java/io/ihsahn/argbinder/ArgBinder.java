@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class ArgBinder {
 
     private final Object target;
-    private final Resolver resolver  = new DefaultResolver();
+    private final Resolver resolver = new DefaultResolver();
 
     public ArgBinder(Object target) {
         this.target = target;
@@ -57,15 +57,15 @@ public class ArgBinder {
         }
         if (List.class.equals(wrappedValue.kind)) {
             List list;
-            if (propertyDescriptor.getReadMethod().invoke(target)==null) {
+            if (propertyDescriptor.getReadMethod().invoke(target) == null) {
                 list = new ArrayList();
                 propertyDescriptor.getWriteMethod().invoke(target, list);
             } else {
-                list = ((List)propertyDescriptor.getReadMethod().invoke(target));
+                list = ((List) propertyDescriptor.getReadMethod().invoke(target));
             }
             int size = list.size();
             int index = resolver.getIndex(paramName);
-            if (index>=size) {
+            if (index >= size) {
                 list.add(null);
             }
         }
@@ -85,7 +85,7 @@ public class ArgBinder {
             if (rawTypeClass.isInstance(List.class)) {
                 vw.kind = List.class;
                 if (indexed) {
-                   //it it's indexed we'll need single value
+                    //it it's indexed we'll need single value
                     if (isEnum(parameterizedType)) {
                         value = convertToEnumValue(value, parameterizedType);
                     }
@@ -93,7 +93,7 @@ public class ArgBinder {
                     value = convertToList(value.toString(), parameterizedType, paramName);
                 }
             } else {
-                throw new IllegalArgumentException("Unsupported bind type: "+rawTypeClass.getName());
+                throw new IllegalArgumentException("Unsupported bind type: " + rawTypeClass.getName());
             }
         } else if (isEnum(genericReturnType)) {
             value = convertToEnumValue(value, genericReturnType);
