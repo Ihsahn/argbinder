@@ -5,10 +5,7 @@ import org.apache.commons.beanutils.expression.DefaultResolver;
 import org.apache.commons.beanutils.expression.Resolver;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,15 +36,65 @@ public class ArgBinder {
         }
     }
 
-    private void setProperty(String paramName, Object value) {
+    private void setProperty(String fullParamNamePath, Object value) {
         try {
-            PropertyDescriptor propertyDescriptor = PropertyUtils.getPropertyDescriptor(target, paramName);
+            String[] objectsPath = fullParamNamePath.split("\\.");
+            Object targetObject = ensureNestedObjectsInitialization(target, objectsPath);
+
+            String paramName = objectsPath[objectsPath.length - 1];
+            PropertyDescriptor propertyDescriptor = PropertyUtils.getPropertyDescriptor(targetObject, paramName);
             ValueWrapper wrappedValue = handleConversion(propertyDescriptor, paramName, value);
             ensureCollectionInitialization(paramName, propertyDescriptor, wrappedValue);
-            PropertyUtils.setNestedProperty(target, paramName, wrappedValue.value);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            PropertyUtils.setNestedProperty(targetObject, paramName, wrappedValue.value);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException | InstantiationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SuppressWarnings({"raw"})
+    private Object ensureNestedObjectsInitialization(Object mainObject, String[] objectsPath) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException, InstantiationException {
+        Object target = mainObject;
+        for (int i = 0; i < objectsPath.length - 1; i++) {
+            String paramName = objectsPath[i];
+            PropertyDescriptor propertyDescriptor = PropertyUtils.getPropertyDescriptor(target, paramName);
+            Method readMethod = propertyDescriptor.getReadMethod();
+            Type genericReturnType = readMethod.getGenericReturnType();
+            if (genericReturnType instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) genericReturnType;
+                Type rawType = parameterizedType.getRawType();
+                Class<? extends Type> rawTypeClass = rawType.getClass();
+                if (rawTypeClass.isInstance(List.class)) {
+                    //ensure initialized
+                    List list = (List) propertyDescriptor.getReadMethod().invoke(target);
+                    if (list == null) {
+                        list = new ArrayList();
+                        propertyDescriptor.getWriteMethod().invoke(target, list);
+                    }
+                    int index = resolver.getIndex(paramName);
+                    //make sure enough objects exist in list
+                    for (int listSize = list.size(); listSize < index + 1; listSize++) {
+                        Type actualTypeArgument = parameterizedType.getActualTypeArguments()[0];
+                        Class<?> aClass1 = Class.forName(actualTypeArgument.getTypeName());
+                        Constructor<?> constructor = aClass1.getConstructor();
+                        Object o = constructor.newInstance();
+                        list.add(o);
+                    }
+                    target = list.get(index);
+                }
+            } else {
+                Object newTarget = propertyDescriptor.getReadMethod().invoke(target);
+                if (newTarget == null) {
+                    //make sure nested object is initialized
+                    Class<?> aClass = Class.forName(genericReturnType.getTypeName());
+                    Constructor<?> constructor = aClass.getConstructor();
+                    Object o = constructor.newInstance();
+                    propertyDescriptor.getWriteMethod().invoke(target, o);
+                    newTarget = o;
+                }
+                target = newTarget;
+            }
+        }
+        return target;
     }
 
     @SuppressWarnings({"raw"})
@@ -85,7 +132,7 @@ public class ArgBinder {
             if (rawTypeClass.isInstance(List.class)) {
                 vw.kind = List.class;
                 if (indexed) {
-                    //it it's indexed we'll need single value
+                    //if it's indexed we'll need single value
                     if (isEnum(parameterizedType)) {
                         value = convertToEnumValue(value, parameterizedType);
                     }
