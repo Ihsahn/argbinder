@@ -2,6 +2,7 @@ package io.ihsahn.argbinder;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,10 +80,67 @@ public class ArgBinderNestedObjectsTest {
         assertEquals(SampleEnum.valueThree, target.getField().getInnerClassField().getSampleEnum());
     }
 
+    @Test
+    public void testBooleans() {
+        TopLevelBooleanClass target = new TopLevelBooleanClass();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"field.bool=true", "children[0].bool=false", "children[1].list=false,true"};
+        binder.parse(args);
+
+        assertEquals(Boolean.TRUE, target.getField().getBool());
+        assertEquals(2, target.getChildren().size());
+        assertEquals(Boolean.FALSE, target.getChildren().get(0).getBool());
+        assertEquals(Arrays.asList(Boolean.FALSE, Boolean.TRUE), target.getChildren().get(1).getList());
+    }
+
     public enum SampleEnum {
         valueOne, valueTwo, valueThree
     }
 
+    public static class TopLevelBooleanClass {
+        private ChildBooleanClass field;
+        private List<ChildBooleanClass> children;
+
+        public ChildBooleanClass getField() {
+            return field;
+        }
+
+        public void setField(ChildBooleanClass field) {
+            this.field = field;
+        }
+
+        public List<ChildBooleanClass> getChildren() {
+            return children;
+        }
+
+        public void setChildren(List<ChildBooleanClass> children) {
+            this.children = children;
+        }
+    }
+
+    public static class ChildBooleanClass {
+        private Boolean bool;
+        private List<Boolean> list;
+
+        public ChildBooleanClass() {
+        }
+
+        public Boolean getBool() {
+            return bool;
+        }
+
+        public void setBool(Boolean bool) {
+            this.bool = bool;
+        }
+
+        public List<Boolean> getList() {
+            return list;
+        }
+
+        public void setList(List<Boolean> list) {
+            this.list = list;
+        }
+    }
     public static class UpperLevelForTwoDepthNest {
         private SomeClassWithInnerClass field;
         private List<UpperLevelForSingleDepthNest> listAtFirstLevel;
