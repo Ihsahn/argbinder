@@ -74,10 +74,7 @@ class ArgBinderListsTest {
         FlatClassListsValues target = new FlatClassListsValues();
         ArgBinder binder = new ArgBinder(target);
         String[] args = {"descriptions[2]", "desc1"};
-        assertThrows(Exception.class, () -> {
-                    binder.parse(args);
-                }
-        );
+        assertThrows(Exception.class, () -> binder.parse(args));
     }
 
     public enum SampleEnum {
