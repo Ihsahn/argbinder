@@ -46,6 +46,18 @@ class ArgBinderTest {
         assertEquals(SampleEnum.valueThree, target.getValues().getSampleEnum());
     }
 
+    @Test
+    public void testEmptyParamsAndLeadingSpaces() {
+        FlatClassStringValues target = new FlatClassStringValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"", " ", "  name", "some name", "description", "some description", "sampleEnum", "valueOne"};
+        binder.parse(args);
+
+        assertEquals("some name", target.getName());
+        assertEquals("some description", target.getDescription());
+        assertEquals(SampleEnum.valueOne, target.getSampleEnum());
+    }
+
     public enum SampleEnum {
         valueOne, valueTwo, valueThree
     }
