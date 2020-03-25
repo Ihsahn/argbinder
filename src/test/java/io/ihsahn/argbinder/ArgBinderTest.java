@@ -19,6 +19,17 @@ class ArgBinderTest {
     }
 
     @Test
+    public void testFlatClassBoolValues() {
+        FlatClassBoolValues target = new FlatClassBoolValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"booleanObjectProperty", "true", "booleanPrimitiveProperty", "false"};
+        binder.parse(args);
+
+        assertEquals(Boolean.TRUE, target.getBooleanObjectProperty());
+        assertEquals(false, target.isBooleanPrimitiveProperty());
+    }
+
+    @Test
     public void testNestedClassStringAndEnumValues() {
         UpperLevelClassStringValues target = new UpperLevelClassStringValues();
         ArgBinder binder = new ArgBinder(target);
@@ -30,6 +41,20 @@ class ArgBinderTest {
         assertEquals("some name", target.getValues().getName());
         assertEquals("some description", target.getValues().getDescription());
         assertEquals(SampleEnum.valueTwo, target.getValues().getSampleEnum());
+    }
+
+    @Test
+    public void testNestedClassBoolValues() {
+        UpperLevelClassBoolValues target = new UpperLevelClassBoolValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"booleanObjectProperty", "true", "values.booleanObjectProperty", "false",
+                "values.booleanPrimitiveProperty", "true"};
+        binder.parse(args);
+
+        assertEquals(Boolean.TRUE, target.getBooleanObjectProperty());
+        assertEquals(false, target.isBooleanPrimitiveProperty());
+        assertEquals(Boolean.FALSE, target.getValues().getBooleanObjectProperty());
+        assertEquals(true, target.getValues().isBooleanPrimitiveProperty());
     }
 
     @Test
@@ -48,6 +73,37 @@ class ArgBinderTest {
 
     public enum SampleEnum {
         valueOne, valueTwo, valueThree
+    }
+
+    public static class UpperLevelClassBoolValues {
+        private Boolean booleanObjectProperty;
+        private boolean booleanPrimitiveProperty;
+
+        private FlatClassBoolValues values = new FlatClassBoolValues();
+
+        public FlatClassBoolValues getValues() {
+            return values;
+        }
+
+        public void setValues(FlatClassBoolValues values) {
+            this.values = values;
+        }
+
+        public Boolean getBooleanObjectProperty() {
+            return booleanObjectProperty;
+        }
+
+        public void setBooleanObjectProperty(Boolean booleanObjectProperty) {
+            this.booleanObjectProperty = booleanObjectProperty;
+        }
+
+        public boolean isBooleanPrimitiveProperty() {
+            return booleanPrimitiveProperty;
+        }
+
+        public void setBooleanPrimitiveProperty(boolean booleanPrimitiveProperty) {
+            this.booleanPrimitiveProperty = booleanPrimitiveProperty;
+        }
     }
 
     public static class UpperLevelClassStringValues {
@@ -79,6 +135,28 @@ class ArgBinderTest {
         public void setTopLevelEnum(SampleEnum topLevelEnum) {
             this.topLevelEnum = topLevelEnum;
         }
+    }
+
+    public static class FlatClassBoolValues {
+        private Boolean booleanObjectProperty;
+        private boolean booleanPrimitiveProperty;
+
+        public Boolean getBooleanObjectProperty() {
+            return booleanObjectProperty;
+        }
+
+        public void setBooleanObjectProperty(Boolean booleanObjectProperty) {
+            this.booleanObjectProperty = booleanObjectProperty;
+        }
+
+        public boolean isBooleanPrimitiveProperty() {
+            return booleanPrimitiveProperty;
+        }
+
+        public void setBooleanPrimitiveProperty(boolean booleanPrimitiveProperty) {
+            this.booleanPrimitiveProperty = booleanPrimitiveProperty;
+        }
+
     }
 
     public static class FlatClassStringValues {

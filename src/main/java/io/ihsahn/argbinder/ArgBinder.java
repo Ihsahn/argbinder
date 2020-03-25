@@ -129,12 +129,15 @@ public class ArgBinder {
             ParameterizedType parameterizedType = (ParameterizedType) genericReturnType;
             Type rawType = parameterizedType.getRawType();
             Class<? extends Type> rawTypeClass = rawType.getClass();
+            Type actualTypeArgument = parameterizedType.getActualTypeArguments()[0];
             if (rawTypeClass.isInstance(List.class)) {
                 vw.kind = List.class;
                 if (indexed) {
                     //if it's indexed we'll need single value
-                    if (isEnum(parameterizedType)) {
-                        value = convertToEnumValue(value, parameterizedType);
+                    if (isEnum(actualTypeArgument)) {
+                        value = convertToEnumValue(value, actualTypeArgument);
+                    } else if (isBoolean(actualTypeArgument)) {
+                        value = Boolean.parseBoolean(value.toString());
                     }
                 } else {
                     value = convertToList(value.toString(), parameterizedType, paramName);
@@ -144,6 +147,8 @@ public class ArgBinder {
             }
         } else if (isEnum(genericReturnType)) {
             value = convertToEnumValue(value, genericReturnType);
+        } else if (isBoolean(readMethod.getReturnType())) {
+            value = Boolean.parseBoolean(value.toString());
         }
         vw.value = value;
         return vw;
@@ -158,6 +163,8 @@ public class ArgBinder {
         //optional conversion
         if (isEnum(actualTypeArguments[0])) {
             return values.stream().map(s -> convertToEnumValue(s, actualTypeArguments[0])).collect(Collectors.toList());
+        } else if (isBoolean(actualTypeArguments[0])) {
+            return values.stream().map(Boolean::parseBoolean).collect(Collectors.toList());
         }
         return values;
     }
@@ -169,6 +176,14 @@ public class ArgBinder {
 
     private boolean isEnum(Type type) {
         return type instanceof Class<?> && ((Class<?>) type).isEnum();
+    }
+
+    private boolean isBoolean(Class<?> returnType) {
+        return returnType.isAssignableFrom(Boolean.class) || returnType.isAssignableFrom(boolean.class);
+    }
+
+    private boolean isBoolean(Type type) {
+        return type instanceof Class<?> && ((Class<?>) type).isAssignableFrom(Boolean.class);
     }
 
     //tiny wrapper, so we won't have discover these things repeatedly in each method

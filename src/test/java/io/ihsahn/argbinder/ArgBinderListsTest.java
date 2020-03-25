@@ -34,6 +34,18 @@ class ArgBinderListsTest {
     }
 
     @Test
+    public void testFlatClassBoolValuesAtOnce() {
+        FlatClassListsValues target = new FlatClassListsValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"booleans", "true,false"};
+        binder.parse(args);
+
+        assertEquals(2, target.getBooleans().size());
+        assertEquals(Boolean.TRUE, target.getBooleans().get(0));
+        assertEquals(Boolean.FALSE, target.getBooleans().get(1));
+    }
+
+    @Test
     public void testNestedClassStringListValuesAtOnce() {
         UpperLevelForListValues target = new UpperLevelForListValues();
         ArgBinder binder = new ArgBinder(target);
@@ -77,6 +89,43 @@ class ArgBinderListsTest {
         assertThrows(Exception.class, () -> binder.parse(args));
     }
 
+    @Test
+    public void testNestedClassBoolListValuesAtOnce() {
+        UpperLevelForListValues target = new UpperLevelForListValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"values.booleans", "false,true"};
+        binder.parse(args);
+
+        assertEquals(2, target.getValues().getBooleans().size());
+        assertEquals(Boolean.FALSE, target.getValues().getBooleans().get(0));
+        assertEquals(Boolean.TRUE, target.getValues().getBooleans().get(1));
+    }
+
+    @Test
+    public void testNestedClassBoolListValuesAtOnceWithEqual() {
+        UpperLevelForListValues target = new UpperLevelForListValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"values.booleans=false,true"};
+        binder.parse(args);
+
+        assertEquals(2, target.getValues().getBooleans().size());
+        assertEquals(Boolean.FALSE, target.getValues().getBooleans().get(0));
+        assertEquals(Boolean.TRUE, target.getValues().getBooleans().get(1));
+    }
+
+    @Test
+    public void testFlatClassBoolValuesIndexes() {
+        FlatClassListsValues target = new FlatClassListsValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"booleans[0]", "true", "booleans[1]", "false"};
+        binder.parse(args);
+
+        assertEquals(2, target.getBooleans().size());
+        assertEquals(Boolean.TRUE, target.getBooleans().get(0));
+        assertEquals(Boolean.FALSE, target.getBooleans().get(1));
+    }
+
+
     public enum SampleEnum {
         valueOne, valueTwo, valueThree
     }
@@ -97,6 +146,7 @@ class ArgBinderListsTest {
     public static class FlatClassListsValues {
         private List<String> descriptions;
         private List<SampleEnum> enums;
+        private List<Boolean> booleans;
 
         public List<String> getDescriptions() {
             return descriptions;
@@ -112,6 +162,14 @@ class ArgBinderListsTest {
 
         public void setEnums(List<SampleEnum> enums) {
             this.enums = enums;
+        }
+
+        public List<Boolean> getBooleans() {
+            return booleans;
+        }
+
+        public void setBooleans(List<Boolean> booleans) {
+            this.booleans = booleans;
         }
     }
 
