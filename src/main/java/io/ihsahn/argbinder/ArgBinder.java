@@ -21,19 +21,25 @@ public class ArgBinder {
     public void parse(String[] args) {
         Iterator<String> argsIterator = Arrays.asList(args).iterator();
         while (argsIterator.hasNext()) {
-            String paramName = argsIterator.next();
-            Optional<String> value = Optional.empty();
-            if (paramName.contains("=")) {
-                String[] split = paramName.split("=", 2);
-                paramName = split[0];
-                value = Optional.of(split[1]);
-            } else if (argsIterator.hasNext()) {
-                value = Optional.of(argsIterator.next());
-            }
+            String paramName = trimLeadingSpace(argsIterator.next());
+            if (!paramName.isEmpty()) {
+                Optional<String> value = Optional.empty();
+                if (paramName.contains("=")) {
+                    String[] split = paramName.split("=", 2);
+                    paramName = split[0];
+                    value = Optional.of(split[1]);
+                } else if (argsIterator.hasNext()) {
+                    value = Optional.of(argsIterator.next());
+                }
 
-            String finalParamName = paramName; //variables in lambdas have to be final...
-            value.ifPresent(valueObject -> setProperty(finalParamName, valueObject));
+                String finalParamName = paramName; //variables in lambdas have to be final...
+                value.ifPresent(valueObject -> setProperty(finalParamName, valueObject));
+            }
         }
+    }
+
+    private String trimLeadingSpace(String string) {
+        return string.replaceAll("^\\s+", "");
     }
 
     private void setProperty(String fullParamNamePath, Object value) {
