@@ -3,6 +3,7 @@ package io.ihsahn.argbinder;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ArgBinderTest {
 
@@ -27,6 +28,17 @@ class ArgBinderTest {
 
         assertEquals(Boolean.TRUE, target.getBooleanObjectProperty());
         assertEquals(false, target.isBooleanPrimitiveProperty());
+    }
+
+    @Test
+    public void testFlatClassIntValues() {
+        FlatClassIntegerValues target = new FlatClassIntegerValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"intObjectProperty", "1", "intPrimitiveProperty", "2"};
+        binder.parse(args);
+
+        assertEquals(1, target.getIntObjectProperty());
+        assertEquals(2, target.getIntPrimitiveProperty());
     }
 
     @Test
@@ -58,6 +70,20 @@ class ArgBinderTest {
     }
 
     @Test
+    public void testNestedIntValues() {
+        UpperLevelClassIntegerValues target = new UpperLevelClassIntegerValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"intObjectProperty", "3", "values.intObjectProperty", "4",
+                "values.intPrimitiveProperty", "5"};
+        binder.parse(args);
+
+        assertEquals(3, target.getIntObjectProperty());
+        assertEquals(0, target.getIntPrimitiveProperty()); //primitive, defaults to 0
+        assertEquals(4, target.getValues().getIntObjectProperty());
+        assertEquals(5, target.getValues().getIntPrimitiveProperty());
+    }
+
+    @Test
     public void testNestedClassStringAndEnumValuesWithEqual() {
         UpperLevelClassStringValues target = new UpperLevelClassStringValues();
         ArgBinder binder = new ArgBinder(target);
@@ -85,6 +111,37 @@ class ArgBinderTest {
 
     public enum SampleEnum {
         valueOne, valueTwo, valueThree
+    }
+
+    public static class UpperLevelClassIntegerValues {
+        private Integer intObjectProperty;
+        private int intPrimitiveProperty;
+
+        private FlatClassIntegerValues values = new FlatClassIntegerValues();
+
+        public Integer getIntObjectProperty() {
+            return intObjectProperty;
+        }
+
+        public void setIntObjectProperty(Integer intObjectProperty) {
+            this.intObjectProperty = intObjectProperty;
+        }
+
+        public int getIntPrimitiveProperty() {
+            return intPrimitiveProperty;
+        }
+
+        public void setIntPrimitiveProperty(int intPrimitiveProperty) {
+            this.intPrimitiveProperty = intPrimitiveProperty;
+        }
+
+        public FlatClassIntegerValues getValues() {
+            return values;
+        }
+
+        public void setValues(FlatClassIntegerValues values) {
+            this.values = values;
+        }
     }
 
     public static class UpperLevelClassBoolValues {
@@ -146,6 +203,27 @@ class ArgBinderTest {
 
         public void setTopLevelEnum(SampleEnum topLevelEnum) {
             this.topLevelEnum = topLevelEnum;
+        }
+    }
+
+    public static class FlatClassIntegerValues {
+        private Integer intObjectProperty;
+        private int intPrimitiveProperty;
+
+        public Integer getIntObjectProperty() {
+            return intObjectProperty;
+        }
+
+        public void setIntObjectProperty(Integer intObjectProperty) {
+            this.intObjectProperty = intObjectProperty;
+        }
+
+        public int getIntPrimitiveProperty() {
+            return intPrimitiveProperty;
+        }
+
+        public void setIntPrimitiveProperty(int intPrimitiveProperty) {
+            this.intPrimitiveProperty = intPrimitiveProperty;
         }
     }
 

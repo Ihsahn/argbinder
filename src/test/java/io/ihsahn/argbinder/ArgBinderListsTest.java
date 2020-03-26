@@ -125,6 +125,41 @@ class ArgBinderListsTest {
         assertEquals(Boolean.FALSE, target.getBooleans().get(1));
     }
 
+    @Test
+    public void testNestedClassIntegersListValuesAtOnce() {
+        UpperLevelForListValues target = new UpperLevelForListValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"values.integers", "3,4"};
+        binder.parse(args);
+
+        assertEquals(2, target.getValues().getIntegers().size());
+        assertEquals(3, target.getValues().getIntegers().get(0));
+        assertEquals(4, target.getValues().getIntegers().get(1));
+    }
+
+    @Test
+    public void testNestedClassIntegersListValuesAtOnceWithEqual() {
+        UpperLevelForListValues target = new UpperLevelForListValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"values.integers=9,20"};
+        binder.parse(args);
+
+        assertEquals(2, target.getValues().getIntegers().size());
+        assertEquals(9, target.getValues().getIntegers().get(0));
+        assertEquals(20, target.getValues().getIntegers().get(1));
+    }
+
+    @Test
+    public void testFlatClassIntegersValuesIndexes() {
+        FlatClassListsValues target = new FlatClassListsValues();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"integers[0]", "6", "integers[1]", "7"};
+        binder.parse(args);
+
+        assertEquals(2, target.getIntegers().size());
+        assertEquals(6, target.getIntegers().get(0));
+        assertEquals(7, target.getIntegers().get(1));
+    }
 
     public enum SampleEnum {
         valueOne, valueTwo, valueThree
@@ -147,6 +182,7 @@ class ArgBinderListsTest {
         private List<String> descriptions;
         private List<SampleEnum> enums;
         private List<Boolean> booleans;
+        private List<Integer> integers;
 
         public List<String> getDescriptions() {
             return descriptions;
@@ -170,6 +206,14 @@ class ArgBinderListsTest {
 
         public void setBooleans(List<Boolean> booleans) {
             this.booleans = booleans;
+        }
+
+        public List<Integer> getIntegers() {
+            return integers;
+        }
+
+        public void setIntegers(List<Integer> integers) {
+            this.integers = integers;
         }
     }
 
