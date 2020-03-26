@@ -93,6 +93,19 @@ public class ArgBinderNestedObjectsTest {
         assertEquals(Arrays.asList(Boolean.FALSE, Boolean.TRUE), target.getChildren().get(1).getList());
     }
 
+    @Test
+    public void testIntegers() {
+        TopLevelIntegerClass target = new TopLevelIntegerClass();
+        ArgBinder binder = new ArgBinder(target);
+        String[] args = {"field.integer=21", "children[0].integer=45", "children[1].list=66,2"};
+        binder.parse(args);
+
+        assertEquals(21, target.getField().getInteger());
+        assertEquals(2, target.getChildren().size());
+        assertEquals(45, target.getChildren().get(0).getInteger());
+        assertEquals(Arrays.asList(66, 2), target.getChildren().get(1).getList());
+    }
+
     public enum SampleEnum {
         valueOne, valueTwo, valueThree
     }
@@ -141,6 +154,52 @@ public class ArgBinderNestedObjectsTest {
             this.list = list;
         }
     }
+
+    public static class TopLevelIntegerClass {
+        private ChildIntegerClass field;
+        private List<ChildIntegerClass> children;
+
+        public ChildIntegerClass getField() {
+            return field;
+        }
+
+        public void setField(ChildIntegerClass field) {
+            this.field = field;
+        }
+
+        public List<ChildIntegerClass> getChildren() {
+            return children;
+        }
+
+        public void setChildren(List<ChildIntegerClass> children) {
+            this.children = children;
+        }
+    }
+
+    public static class ChildIntegerClass {
+        private Integer integer;
+        private List<Integer> list;
+
+        public ChildIntegerClass() {
+        }
+
+        public List<Integer> getList() {
+            return list;
+        }
+
+        public void setList(List<Integer> list) {
+            this.list = list;
+        }
+
+        public Integer getInteger() {
+            return integer;
+        }
+
+        public void setInteger(Integer integer) {
+            this.integer = integer;
+        }
+    }
+
     public static class UpperLevelForTwoDepthNest {
         private SomeClassWithInnerClass field;
         private List<UpperLevelForSingleDepthNest> listAtFirstLevel;

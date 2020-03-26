@@ -144,6 +144,8 @@ public class ArgBinder {
                         value = convertToEnumValue(value, actualTypeArgument);
                     } else if (isBoolean(actualTypeArgument)) {
                         value = Boolean.parseBoolean(value.toString());
+                    } else if (isInteger(actualTypeArgument)) {
+                        value = Integer.parseInt(value.toString());
                     }
                 } else {
                     value = convertToList(value.toString(), parameterizedType, paramName);
@@ -155,6 +157,8 @@ public class ArgBinder {
             value = convertToEnumValue(value, genericReturnType);
         } else if (isBoolean(readMethod.getReturnType())) {
             value = Boolean.parseBoolean(value.toString());
+        } else if (isInteger(readMethod.getReturnType())) {
+            value = Integer.parseInt(value.toString());
         }
         vw.value = value;
         return vw;
@@ -171,6 +175,8 @@ public class ArgBinder {
             return values.stream().map(s -> convertToEnumValue(s, actualTypeArguments[0])).collect(Collectors.toList());
         } else if (isBoolean(actualTypeArguments[0])) {
             return values.stream().map(Boolean::parseBoolean).collect(Collectors.toList());
+        } else if (isInteger(actualTypeArguments[0])) {
+            return values.stream().map(Integer::parseInt).collect(Collectors.toList());
         }
         return values;
     }
@@ -188,8 +194,16 @@ public class ArgBinder {
         return returnType.isAssignableFrom(Boolean.class) || returnType.isAssignableFrom(boolean.class);
     }
 
+    private boolean isInteger(Class<?> returnType) {
+        return returnType.isAssignableFrom(Integer.class) || returnType.isAssignableFrom(int.class);
+    }
+
     private boolean isBoolean(Type type) {
         return type instanceof Class<?> && ((Class<?>) type).isAssignableFrom(Boolean.class);
+    }
+
+    private boolean isInteger(Type type) {
+        return type instanceof Class<?> && ((Class<?>) type).isAssignableFrom(Integer.class);
     }
 
     //tiny wrapper, so we won't have discover these things repeatedly in each method
