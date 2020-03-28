@@ -22,7 +22,11 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
 }
 
-println "user:"+System.getenv()
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
 
 publishing {
     repositories {
@@ -43,5 +47,5 @@ publishing {
 }
 
 wrapper {
-    gradleVersion = "5.6.2"
+    gradleVersion = "6.3"
 }
